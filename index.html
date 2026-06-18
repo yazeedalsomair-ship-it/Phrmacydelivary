@@ -1,0 +1,1386 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>نظام توصيل الأدوية - الصيدلية</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600&display=swap');
+
+  :root {
+    --bg: #F0F4F8;
+    --surface: #FFFFFF;
+    --surface2: #F7FAFB;
+    --border: #E2E8EF;
+    --text: #1A2332;
+    --muted: #6B7C93;
+    --accent: #0066CC;
+    --accent-light: #E8F2FF;
+    --amber: #D97706;
+    --amber-light: #FEF3C7;
+    --blue: #0066CC;
+    --blue-light: #EFF6FF;
+    --green: #059669;
+    --green-light: #ECFDF5;
+    --red: #DC2626;
+    --red-light: #FEF2F2;
+    --radius: 10px;
+    --shadow: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04);
+    --shadow-md: 0 4px 6px rgba(0,0,0,0.07), 0 2px 4px rgba(0,0,0,0.04);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'IBM Plex Sans Arabic', 'Segoe UI', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    font-size: 14px;
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  /* TOP BAR */
+  .topbar {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 0 24px;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: var(--shadow);
+  }
+
+  .topbar-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 600;
+    font-size: 15px;
+    color: var(--text);
+  }
+
+  .topbar-brand .logo {
+    width: 32px;
+    height: 32px;
+    background: var(--accent);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 16px;
+  }
+
+  .topbar-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  /* LAYOUT */
+  .layout {
+    display: grid;
+    grid-template-columns: 220px 1fr;
+    min-height: calc(100vh - 56px);
+  }
+
+  /* SIDEBAR */
+  .sidebar {
+    background: var(--surface);
+    border-left: 1px solid var(--border);
+    padding: 16px 0;
+    position: sticky;
+    top: 56px;
+    height: calc(100vh - 56px);
+    overflow-y: auto;
+  }
+
+  .nav-section {
+    padding: 0 12px 16px;
+  }
+
+  .nav-label {
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--muted);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 0 8px 8px;
+  }
+
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    color: var(--muted);
+    font-size: 13.5px;
+    font-weight: 400;
+    transition: all 0.15s;
+    border: none;
+    background: none;
+    width: 100%;
+    text-align: right;
+  }
+
+  .nav-item:hover { background: var(--bg); color: var(--text); }
+  .nav-item.active { background: var(--accent-light); color: var(--accent); font-weight: 500; }
+
+  .nav-item .icon {
+    width: 18px;
+    text-align: center;
+    font-size: 15px;
+    flex-shrink: 0;
+  }
+
+  .badge-count {
+    margin-right: auto;
+    background: var(--red);
+    color: white;
+    font-size: 10px;
+    font-weight: 600;
+    padding: 1px 6px;
+    border-radius: 10px;
+    min-width: 18px;
+    text-align: center;
+  }
+
+  /* MAIN CONTENT */
+  .main {
+    padding: 24px;
+    overflow-y: auto;
+  }
+
+  /* PAGE HEADER */
+  .page-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+  }
+
+  .page-title {
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  .page-subtitle {
+    font-size: 13px;
+    color: var(--muted);
+    margin-top: 2px;
+  }
+
+  /* STATS ROW */
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px;
+    box-shadow: var(--shadow);
+  }
+
+  .stat-label {
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--muted);
+    margin-bottom: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  .stat-value {
+    font-size: 28px;
+    font-weight: 600;
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+
+  .stat-sub {
+    font-size: 11px;
+    color: var(--muted);
+  }
+
+  /* TOOLBAR */
+  .toolbar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+  }
+
+  .search-box {
+    flex: 1;
+    min-width: 200px;
+    position: relative;
+  }
+
+  .search-box input {
+    width: 100%;
+    padding: 8px 12px 8px 36px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--surface);
+    font-size: 13.5px;
+    color: var(--text);
+    font-family: inherit;
+    transition: border-color 0.15s;
+    outline: none;
+    direction: rtl;
+  }
+
+  .search-box input:focus { border-color: var(--accent); }
+
+  .search-box .search-icon {
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--muted);
+    font-size: 14px;
+    pointer-events: none;
+  }
+
+  .filter-tabs {
+    display: flex;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  .filter-tab {
+    padding: 7px 14px;
+    font-size: 12.5px;
+    font-weight: 500;
+    cursor: pointer;
+    color: var(--muted);
+    border: none;
+    background: none;
+    font-family: inherit;
+    transition: all 0.15s;
+    white-space: nowrap;
+  }
+
+  .filter-tab:hover { background: var(--bg); color: var(--text); }
+  .filter-tab.active { background: var(--accent); color: white; }
+
+  /* BUTTONS */
+  .btn {
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 13.5px;
+    font-weight: 500;
+    cursor: pointer;
+    border: none;
+    font-family: inherit;
+    transition: all 0.15s;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+  }
+
+  .btn-primary { background: var(--accent); color: white; }
+  .btn-primary:hover { background: #0055B3; }
+  .btn-ghost { background: var(--surface); color: var(--text); border: 1px solid var(--border); }
+  .btn-ghost:hover { background: var(--bg); }
+  .btn-sm { padding: 5px 10px; font-size: 12px; }
+
+  /* ORDERS TABLE */
+  .orders-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+  }
+
+  .table-header {
+    display: grid;
+    grid-template-columns: 50px 1fr 130px 110px 110px 110px 140px;
+    gap: 0;
+    padding: 10px 16px;
+    background: var(--surface2);
+    border-bottom: 1px solid var(--border);
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .order-row {
+    display: grid;
+    grid-template-columns: 50px 1fr 130px 110px 110px 110px 140px;
+    gap: 0;
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--border);
+    align-items: center;
+    transition: background 0.1s;
+    cursor: pointer;
+  }
+
+  .order-row:last-child { border-bottom: none; }
+  .order-row:hover { background: var(--surface2); }
+
+  .order-id {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--muted);
+  }
+
+  .patient-name {
+    font-weight: 500;
+    font-size: 13.5px;
+  }
+
+  .patient-file {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 2px;
+  }
+
+  .phone-link {
+    color: var(--accent);
+    font-size: 12.5px;
+    text-decoration: none;
+    direction: ltr;
+    display: block;
+  }
+
+  .branch-badge {
+    font-size: 11px;
+    font-weight: 500;
+    padding: 3px 8px;
+    border-radius: 20px;
+    background: var(--bg);
+    color: var(--muted);
+    display: inline-block;
+  }
+
+  /* STATUS BADGES */
+  .status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 11.5px;
+    font-weight: 500;
+    white-space: nowrap;
+  }
+
+  .status-badge::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .status-preparing {
+    background: var(--amber-light);
+    color: var(--amber);
+  }
+  .status-preparing::before { background: var(--amber); }
+
+  .status-delivering {
+    background: var(--blue-light);
+    color: var(--blue);
+  }
+  .status-delivering::before { background: var(--blue); }
+
+  .status-done {
+    background: var(--green-light);
+    color: var(--green);
+  }
+  .status-done::before { background: var(--green); }
+
+  .status-new {
+    background: #F3F0FF;
+    color: #6D28D9;
+  }
+  .status-new::before { background: #6D28D9; }
+
+  .row-actions {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+  }
+
+  .action-btn {
+    padding: 5px 10px;
+    border-radius: 6px;
+    font-size: 11.5px;
+    font-weight: 500;
+    cursor: pointer;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text);
+    font-family: inherit;
+    transition: all 0.15s;
+  }
+
+  .action-btn:hover { background: var(--bg); }
+
+  .action-btn.primary {
+    background: var(--accent);
+    color: white;
+    border-color: var(--accent);
+  }
+
+  .action-btn.primary:hover { background: #0055B3; }
+
+  /* MODAL OVERLAY */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(10, 20, 40, 0.5);
+    z-index: 200;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    backdrop-filter: blur(2px);
+  }
+
+  .modal-overlay.hidden { display: none; }
+
+  .modal {
+    background: var(--surface);
+    border-radius: 14px;
+    padding: 28px;
+    width: 100%;
+    max-width: 560px;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+    position: relative;
+  }
+
+  .modal-title {
+    font-size: 17px;
+    font-weight: 600;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .modal-close {
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    border: none;
+    background: var(--bg);
+    cursor: pointer;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--muted);
+    transition: all 0.15s;
+  }
+
+  .modal-close:hover { background: var(--border); color: var(--text); }
+
+  /* FORM */
+  .form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+  }
+
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  .form-group.full { grid-column: 1 / -1; }
+
+  .form-label {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--muted);
+  }
+
+  .form-input, .form-select, .form-textarea {
+    padding: 9px 12px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 13.5px;
+    color: var(--text);
+    background: var(--surface);
+    font-family: inherit;
+    transition: border-color 0.15s;
+    outline: none;
+    direction: rtl;
+  }
+
+  .form-input:focus, .form-select:focus, .form-textarea:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(0,102,204,0.08);
+  }
+
+  .form-textarea { resize: vertical; min-height: 70px; }
+
+  .form-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+    margin-top: 20px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
+  }
+
+  /* ORDER DETAIL MODAL */
+  .detail-section {
+    margin-bottom: 16px;
+  }
+
+  .detail-section-title {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 10px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .detail-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .detail-item { }
+
+  .detail-item-label {
+    font-size: 11px;
+    color: var(--muted);
+    margin-bottom: 2px;
+  }
+
+  .detail-item-value {
+    font-size: 13.5px;
+    font-weight: 500;
+    color: var(--text);
+  }
+
+  .status-select-row {
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+    flex-wrap: wrap;
+  }
+
+  .status-option {
+    flex: 1;
+    padding: 10px;
+    border: 2px solid var(--border);
+    border-radius: 8px;
+    text-align: center;
+    cursor: pointer;
+    font-size: 12.5px;
+    font-weight: 500;
+    transition: all 0.15s;
+    background: var(--surface);
+    color: var(--muted);
+    min-width: 90px;
+  }
+
+  .status-option:hover { border-color: var(--accent); color: var(--accent); }
+
+  .status-option.selected-preparing {
+    border-color: var(--amber);
+    background: var(--amber-light);
+    color: var(--amber);
+  }
+
+  .status-option.selected-delivering {
+    border-color: var(--blue);
+    background: var(--blue-light);
+    color: var(--blue);
+  }
+
+  .status-option.selected-done {
+    border-color: var(--green);
+    background: var(--green-light);
+    color: var(--green);
+  }
+
+  /* WA BUTTON */
+  .wa-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 9px 16px;
+    background: #25D366;
+    color: white;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    border: none;
+    font-family: inherit;
+    text-decoration: none;
+    transition: background 0.15s;
+  }
+
+  .wa-btn:hover { background: #1DAA58; }
+
+  /* TOAST */
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%) translateY(80px);
+    background: #1A2332;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-size: 13.5px;
+    z-index: 999;
+    transition: transform 0.3s ease;
+    white-space: nowrap;
+  }
+
+  .toast.show { transform: translateX(-50%) translateY(0); }
+
+  /* EMPTY STATE */
+  .empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--muted);
+  }
+
+  .empty-state .empty-icon {
+    font-size: 40px;
+    margin-bottom: 12px;
+  }
+
+  .empty-state h3 {
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--text);
+    margin-bottom: 6px;
+  }
+
+  /* UPLOAD ZONE */
+  .upload-zone {
+    border: 2px dashed var(--border);
+    border-radius: 10px;
+    padding: 24px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-bottom: 16px;
+    background: var(--surface2);
+  }
+
+  .upload-zone:hover, .upload-zone.drag-over {
+    border-color: var(--accent);
+    background: var(--accent-light);
+  }
+
+  .upload-zone .upload-icon { font-size: 28px; margin-bottom: 8px; }
+  .upload-zone p { color: var(--muted); font-size: 13px; }
+  .upload-zone strong { color: var(--accent); }
+
+  /* AI LOADING */
+  .ai-loading {
+    display: none;
+    align-items: center;
+    gap: 10px;
+    padding: 12px;
+    background: var(--accent-light);
+    border-radius: 8px;
+    font-size: 13px;
+    color: var(--accent);
+    margin-bottom: 12px;
+  }
+
+  .ai-loading.show { display: flex; }
+
+  .spinner {
+    width: 16px;
+    height: 16px;
+    border: 2px solid rgba(0,102,204,0.3);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    flex-shrink: 0;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .divider { margin: 10px 0; text-align: center; color: var(--muted); font-size: 12px; position: relative; }
+  .divider::before { content: ''; position: absolute; top: 50%; right: 0; left: 0; height: 1px; background: var(--border); }
+  .divider span { position: relative; background: var(--surface); padding: 0 10px; }
+
+  /* Date/time display */
+  .order-time {
+    font-size: 11.5px;
+    color: var(--muted);
+    direction: ltr;
+    display: block;
+  }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 5px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+  /* Image preview */
+  .img-preview {
+    width: 100%;
+    max-height: 200px;
+    object-fit: contain;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    display: none;
+    margin-bottom: 10px;
+  }
+
+  .img-preview.show { display: block; }
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <div class="topbar-brand">
+    <div class="logo">💊</div>
+    <div>
+      <span>نظام توصيل الأدوية</span>
+      <span style="font-size:11px;color:var(--muted);font-weight:400;margin-right:8px;">صيدلية المنزل</span>
+    </div>
+  </div>
+  <div class="topbar-actions">
+    <button class="btn btn-ghost btn-sm" onclick="exportExcel()">⬇ تصدير Excel</button>
+    <button class="btn btn-primary" onclick="openAddModal()">+ طلب جديد</button>
+  </div>
+</div>
+
+<!-- LAYOUT -->
+<div class="layout">
+
+  <!-- SIDEBAR -->
+  <nav class="sidebar">
+    <div class="nav-section">
+      <div class="nav-label">القائمة</div>
+      <button class="nav-item active" onclick="setView('all')">
+        <span class="icon">📋</span> جميع الطلبات
+        <span class="badge-count" id="badge-all">0</span>
+      </button>
+      <button class="nav-item" onclick="setView('new')">
+        <span class="icon">🆕</span> طلبات جديدة
+        <span class="badge-count" id="badge-new" style="background:var(--accent)">0</span>
+      </button>
+      <button class="nav-item" onclick="setView('preparing')">
+        <span class="icon">🔬</span> جاري التحضير
+        <span class="badge-count" id="badge-preparing" style="background:var(--amber)">0</span>
+      </button>
+      <button class="nav-item" onclick="setView('delivering')">
+        <span class="icon">🚗</span> جاري التوصيل
+        <span class="badge-count" id="badge-delivering" style="background:var(--blue)">0</span>
+      </button>
+      <button class="nav-item" onclick="setView('done')">
+        <span class="icon">✅</span> تم التوصيل
+        <span class="badge-count" id="badge-done" style="background:var(--green)">0</span>
+      </button>
+    </div>
+    <div class="nav-section" style="border-top:1px solid var(--border);padding-top:16px;margin-top:4px;">
+      <div class="nav-label">الأدوات</div>
+      <button class="nav-item" onclick="openAddModal()">
+        <span class="icon">➕</span> إضافة طلب
+      </button>
+      <button class="nav-item" onclick="exportExcel()">
+        <span class="icon">📊</span> تصدير Excel
+      </button>
+    </div>
+  </nav>
+
+  <!-- MAIN -->
+  <main class="main">
+
+    <!-- STATS -->
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-label">إجمالي الطلبات</div>
+        <div class="stat-value" id="stat-total" style="color:var(--text)">0</div>
+        <div class="stat-sub">اليوم</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">جاري التحضير</div>
+        <div class="stat-value" id="stat-preparing" style="color:var(--amber)">0</div>
+        <div class="stat-sub">بانتظار التحضير</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">جاري التوصيل</div>
+        <div class="stat-value" id="stat-delivering" style="color:var(--blue)">0</div>
+        <div class="stat-sub">في الطريق</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">تم التوصيل</div>
+        <div class="stat-value" id="stat-done" style="color:var(--green)">0</div>
+        <div class="stat-sub">مكتمل</div>
+      </div>
+    </div>
+
+    <!-- TOOLBAR -->
+    <div class="toolbar">
+      <div class="search-box">
+        <span class="search-icon">🔍</span>
+        <input type="text" placeholder="البحث بالاسم أو رقم الملف أو الجوال..." id="search-input" oninput="renderOrders()">
+      </div>
+      <div class="filter-tabs">
+        <button class="filter-tab active" data-filter="all" onclick="setFilter(this,'all')">الكل</button>
+        <button class="filter-tab" data-filter="new" onclick="setFilter(this,'new')">جديد</button>
+        <button class="filter-tab" data-filter="preparing" onclick="setFilter(this,'preparing')">تحضير</button>
+        <button class="filter-tab" data-filter="delivering" onclick="setFilter(this,'delivering')">توصيل</button>
+        <button class="filter-tab" data-filter="done" onclick="setFilter(this,'done')">مكتمل</button>
+      </div>
+    </div>
+
+    <!-- ORDERS TABLE -->
+    <div class="orders-card">
+      <div class="table-header">
+        <div>#</div>
+        <div>المريض</div>
+        <div>الجوال</div>
+        <div>الفرع</div>
+        <div>وقت الطلب</div>
+        <div>الحالة</div>
+        <div>إجراءات</div>
+      </div>
+      <div id="orders-list"></div>
+    </div>
+
+  </main>
+</div>
+
+<!-- ADD ORDER MODAL -->
+<div class="modal-overlay hidden" id="add-modal">
+  <div class="modal">
+    <div class="modal-title">
+      <span>إضافة طلب جديد</span>
+      <button class="modal-close" onclick="closeModal('add-modal')">✕</button>
+    </div>
+
+    <!-- Upload Zone -->
+    <div class="upload-zone" id="upload-zone" onclick="document.getElementById('file-input').click()"
+         ondragover="event.preventDefault();this.classList.add('drag-over')"
+         ondragleave="this.classList.remove('drag-over')"
+         ondrop="handleDrop(event)">
+      <div class="upload-icon">📧</div>
+      <p><strong>ارفع صورة الإيميل</strong> أو اسحبها هنا</p>
+      <p style="font-size:11px;margin-top:4px;">سيستخرج الذكاء الاصطناعي البيانات تلقائياً</p>
+      <input type="file" id="file-input" accept="image/*" style="display:none" onchange="handleFileSelect(event)">
+    </div>
+
+    <img id="img-preview" class="img-preview" alt="معاينة الإيميل">
+
+    <div class="ai-loading" id="ai-loading">
+      <div class="spinner"></div>
+      <span>جاري استخراج البيانات بالذكاء الاصطناعي...</span>
+    </div>
+
+    <div class="divider"><span>أو أدخل البيانات يدوياً</span></div>
+
+    <div class="form-grid" style="margin-top:12px;">
+      <div class="form-group full">
+        <label class="form-label">اسم المريض *</label>
+        <input type="text" class="form-input" id="f-name" placeholder="مثال: HODAI AHMAD">
+      </div>
+      <div class="form-group">
+        <label class="form-label">رقم الملف</label>
+        <input type="text" class="form-input" id="f-file" placeholder="2177509">
+      </div>
+      <div class="form-group">
+        <label class="form-label">رقم الجوال *</label>
+        <input type="tel" class="form-input" id="f-phone" placeholder="508801793" dir="ltr">
+      </div>
+      <div class="form-group">
+        <label class="form-label">الفرع</label>
+        <select class="form-select" id="f-branch">
+          <option value="">اختر الفرع</option>
+          <option>HAIL</option>
+          <option>MADINAH</option>
+          <option>RIYADH</option>
+          <option>JEDDAH</option>
+          <option>MAKKAH</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">الطلب من</label>
+        <select class="form-select" id="f-relation">
+          <option value="المريض بنفسه">المريض بنفسه</option>
+          <option value="أحد أفراد الأسرة">أحد أفراد الأسرة</option>
+          <option value="جهة أخرى">جهة أخرى</option>
+        </select>
+      </div>
+      <div class="form-group full">
+        <label class="form-label">ملاحظات / التعليق</label>
+        <textarea class="form-textarea" id="f-notes" placeholder="المريضة تريد توصيل الادوية الى المنزل..."></textarea>
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <button class="btn btn-ghost" onclick="closeModal('add-modal')">إلغاء</button>
+      <button class="btn btn-primary" onclick="saveOrder()">💾 حفظ الطلب</button>
+    </div>
+  </div>
+</div>
+
+<!-- ORDER DETAIL MODAL -->
+<div class="modal-overlay hidden" id="detail-modal">
+  <div class="modal">
+    <div class="modal-title">
+      <span id="detail-title">تفاصيل الطلب</span>
+      <button class="modal-close" onclick="closeModal('detail-modal')">✕</button>
+    </div>
+
+    <div class="detail-section">
+      <div class="detail-section-title">بيانات المريض</div>
+      <div class="detail-grid">
+        <div class="detail-item">
+          <div class="detail-item-label">الاسم</div>
+          <div class="detail-item-value" id="d-name">—</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-item-label">رقم الملف</div>
+          <div class="detail-item-value" id="d-file">—</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-item-label">رقم الجوال</div>
+          <div class="detail-item-value" id="d-phone">—</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-item-label">الفرع</div>
+          <div class="detail-item-value" id="d-branch">—</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-item-label">الطلب من</div>
+          <div class="detail-item-value" id="d-relation">—</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-item-label">وقت الطلب</div>
+          <div class="detail-item-value" id="d-time">—</div>
+        </div>
+      </div>
+      <div style="margin-top:12px;">
+        <div class="detail-item-label" style="margin-bottom:4px;">ملاحظات</div>
+        <div class="detail-item-value" id="d-notes" style="background:var(--surface2);padding:10px;border-radius:8px;font-size:13px;font-weight:400;border:1px solid var(--border);">—</div>
+      </div>
+    </div>
+
+    <div class="detail-section">
+      <div class="detail-section-title">تغيير حالة الطلب</div>
+      <div class="status-select-row" id="status-select-row"></div>
+    </div>
+
+    <div class="detail-section" id="wa-section">
+      <div class="detail-section-title">إشعار الموصّل</div>
+      <a class="wa-btn" id="wa-link" href="#" target="_blank">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+        إرسال إشعار للموصّل
+      </a>
+      <div style="margin-top:10px;font-size:12px;color:var(--muted)">سيفتح تطبيق واتساب برسالة جاهزة بتفاصيل الطلب</div>
+    </div>
+
+    <div class="form-actions">
+      <button class="btn btn-ghost" style="color:var(--red);border-color:var(--red)" onclick="deleteCurrentOrder()">🗑 حذف</button>
+      <button class="btn btn-ghost" onclick="closeModal('detail-modal')">إغلاق</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ─── DATA ────────────────────────────────────────────────────────────────────
+let orders = JSON.parse(localStorage.getItem('pharmacy-orders') || '[]');
+let currentFilter = 'all';
+let currentOrderId = null;
+
+function save() {
+  localStorage.setItem('pharmacy-orders', JSON.stringify(orders));
+}
+
+function genId() {
+  return 'ORD-' + Date.now().toString().slice(-6);
+}
+
+function formatTime(ts) {
+  const d = new Date(ts);
+  return d.toLocaleDateString('ar-SA') + ' ' + d.toLocaleTimeString('ar-SA', { hour: '2-digit', minute: '2-digit' });
+}
+
+// ─── RENDER ──────────────────────────────────────────────────────────────────
+function updateStats() {
+  const counts = { all: orders.length, new: 0, preparing: 0, delivering: 0, done: 0 };
+  orders.forEach(o => {
+    if (counts[o.status] !== undefined) counts[o.status]++;
+  });
+  document.getElementById('stat-total').textContent = counts.all;
+  document.getElementById('stat-preparing').textContent = counts.preparing;
+  document.getElementById('stat-delivering').textContent = counts.delivering;
+  document.getElementById('stat-done').textContent = counts.done;
+  ['all','new','preparing','delivering','done'].forEach(k => {
+    document.getElementById('badge-' + k).textContent = counts[k];
+  });
+}
+
+function statusBadge(status) {
+  const map = {
+    new: ['status-new', 'جديد'],
+    preparing: ['status-preparing', 'جاري التحضير'],
+    delivering: ['status-delivering', 'جاري التوصيل'],
+    done: ['status-done', 'تم التوصيل'],
+  };
+  const [cls, label] = map[status] || ['status-new', status];
+  return `<span class="status-badge ${cls}">${label}</span>`;
+}
+
+function nextStatusBtn(order) {
+  const nexts = {
+    new: ['preparing', 'جاري التحضير', 'var(--amber)'],
+    preparing: ['delivering', 'جاري التوصيل', 'var(--blue)'],
+    delivering: ['done', 'تم التوصيل ✓', 'var(--green)'],
+    done: [null, '✓ مكتمل', 'var(--green)'],
+  };
+  const [next, label, color] = nexts[order.status];
+  if (!next) return `<button class="action-btn" style="color:var(--green);cursor:default" disabled>${label}</button>`;
+  return `<button class="action-btn primary" onclick="quickStatus('${order.id}','${next}',event)" style="background:${color};border-color:${color}">${label}</button>`;
+}
+
+function renderOrders() {
+  const search = document.getElementById('search-input').value.toLowerCase();
+  const list = document.getElementById('orders-list');
+
+  let filtered = orders.filter(o => {
+    if (currentFilter !== 'all' && o.status !== currentFilter) return false;
+    if (search) {
+      return (o.name || '').toLowerCase().includes(search) ||
+             (o.phone || '').includes(search) ||
+             (o.fileNo || '').includes(search);
+    }
+    return true;
+  });
+
+  // Sort: newest first, done last
+  filtered.sort((a, b) => {
+    if (a.status === 'done' && b.status !== 'done') return 1;
+    if (b.status === 'done' && a.status !== 'done') return -1;
+    return b.ts - a.ts;
+  });
+
+  if (filtered.length === 0) {
+    list.innerHTML = `<div class="empty-state">
+      <div class="empty-icon">📭</div>
+      <h3>لا توجد طلبات</h3>
+      <p>أضف طلباً جديداً أو غيّر الفلتر</p>
+    </div>`;
+    return;
+  }
+
+  list.innerHTML = filtered.map((o, i) => `
+    <div class="order-row" onclick="openDetail('${o.id}')">
+      <div class="order-id">${i + 1}</div>
+      <div>
+        <div class="patient-name">${o.name || '—'}</div>
+        <div class="patient-file">${o.fileNo ? 'ملف: ' + o.fileNo : ''}</div>
+      </div>
+      <div>
+        <a href="tel:${o.phone}" class="phone-link" onclick="event.stopPropagation()">${o.phone || '—'}</a>
+      </div>
+      <div><span class="branch-badge">${o.branch || '—'}</span></div>
+      <div><span class="order-time">${formatTime(o.ts)}</span></div>
+      <div>${statusBadge(o.status)}</div>
+      <div class="row-actions" onclick="event.stopPropagation()">
+        ${nextStatusBtn(o)}
+        <button class="action-btn" onclick="openDetail('${o.id}')">تفاصيل</button>
+      </div>
+    </div>
+  `).join('');
+
+  updateStats();
+}
+
+// ─── NAVIGATION ──────────────────────────────────────────────────────────────
+function setView(v) {
+  currentFilter = v;
+  document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+  event.currentTarget.classList.add('active');
+  // Sync filter tabs
+  document.querySelectorAll('.filter-tab').forEach(t => {
+    t.classList.toggle('active', t.dataset.filter === v);
+  });
+  renderOrders();
+}
+
+function setFilter(el, v) {
+  currentFilter = v;
+  document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  renderOrders();
+}
+
+// ─── ADD ORDER ───────────────────────────────────────────────────────────────
+function openAddModal() {
+  document.getElementById('f-name').value = '';
+  document.getElementById('f-file').value = '';
+  document.getElementById('f-phone').value = '';
+  document.getElementById('f-branch').value = '';
+  document.getElementById('f-notes').value = '';
+  document.getElementById('img-preview').classList.remove('show');
+  document.getElementById('ai-loading').classList.remove('show');
+  document.getElementById('add-modal').classList.remove('hidden');
+}
+
+function saveOrder() {
+  const name = document.getElementById('f-name').value.trim();
+  const phone = document.getElementById('f-phone').value.trim();
+  if (!name || !phone) { showToast('⚠️ الرجاء إدخال اسم المريض ورقم الجوال'); return; }
+
+  const order = {
+    id: genId(),
+    name,
+    fileNo: document.getElementById('f-file').value.trim(),
+    phone,
+    branch: document.getElementById('f-branch').value,
+    relation: document.getElementById('f-relation').value,
+    notes: document.getElementById('f-notes').value.trim(),
+    status: 'new',
+    ts: Date.now(),
+  };
+
+  orders.unshift(order);
+  save();
+  closeModal('add-modal');
+  renderOrders();
+  showToast('✅ تم إضافة الطلب بنجاح');
+}
+
+// ─── FILE UPLOAD + AI ────────────────────────────────────────────────────────
+function handleFileSelect(e) {
+  const file = e.target.files[0];
+  if (file) processImage(file);
+}
+
+function handleDrop(e) {
+  e.preventDefault();
+  document.getElementById('upload-zone').classList.remove('drag-over');
+  const file = e.dataTransfer.files[0];
+  if (file && file.type.startsWith('image/')) processImage(file);
+}
+
+async function processImage(file) {
+  const reader = new FileReader();
+  reader.onload = async (ev) => {
+    const b64 = ev.target.result.split(',')[1];
+    const preview = document.getElementById('img-preview');
+    preview.src = ev.target.result;
+    preview.classList.add('show');
+
+    const loading = document.getElementById('ai-loading');
+    loading.classList.add('show');
+
+    try {
+      const resp = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model: 'claude-sonnet-4-6',
+          max_tokens: 1000,
+          messages: [{
+            role: 'user',
+            content: [
+              {
+                type: 'image',
+                source: { type: 'base64', media_type: file.type, data: b64 }
+              },
+              {
+                type: 'text',
+                text: 'استخرج بيانات طلب التوصيل من هذه الصورة. أجب فقط بـ JSON بهذا الشكل بدون أي نص آخر:\n{"name":"","fileNo":"","phone":"","branch":"","relation":"","notes":""}'
+              }
+            ]
+          }]
+        })
+      });
+
+      const data = await resp.json();
+      const text = data.content?.[0]?.text || '{}';
+      const clean = text.replace(/```json|```/g, '').trim();
+      const parsed = JSON.parse(clean);
+
+      if (parsed.name) document.getElementById('f-name').value = parsed.name;
+      if (parsed.fileNo) document.getElementById('f-file').value = parsed.fileNo;
+      if (parsed.phone) document.getElementById('f-phone').value = parsed.phone;
+      if (parsed.branch) document.getElementById('f-branch').value = parsed.branch;
+      if (parsed.notes) document.getElementById('f-notes').value = parsed.notes;
+      if (parsed.relation) document.getElementById('f-relation').value = parsed.relation;
+
+      showToast('✨ تم استخراج البيانات بنجاح');
+    } catch (err) {
+      showToast('⚠️ لم يتم الاستخراج، أدخل البيانات يدوياً');
+    } finally {
+      loading.classList.remove('show');
+    }
+  };
+  reader.readAsDataURL(file);
+}
+
+// ─── ORDER DETAIL ─────────────────────────────────────────────────────────────
+function openDetail(id) {
+  const o = orders.find(x => x.id === id);
+  if (!o) return;
+  currentOrderId = id;
+
+  document.getElementById('detail-title').textContent = 'طلب #' + o.id;
+  document.getElementById('d-name').textContent = o.name || '—';
+  document.getElementById('d-file').textContent = o.fileNo || '—';
+  document.getElementById('d-phone').textContent = o.phone || '—';
+  document.getElementById('d-branch').textContent = o.branch || '—';
+  document.getElementById('d-relation').textContent = o.relation || '—';
+  document.getElementById('d-time').textContent = formatTime(o.ts);
+  document.getElementById('d-notes').textContent = o.notes || 'لا توجد ملاحظات';
+
+  // Status selector
+  const statuses = [
+    { val: 'new', label: '🆕 جديد', cls: 'new' },
+    { val: 'preparing', label: '🔬 جاري التحضير', cls: 'preparing' },
+    { val: 'delivering', label: '🚗 جاري التوصيل', cls: 'delivering' },
+    { val: 'done', label: '✅ تم التوصيل', cls: 'done' },
+  ];
+
+  document.getElementById('status-select-row').innerHTML = statuses.map(s => `
+    <div class="status-option ${o.status === s.val ? 'selected-' + s.cls : ''}"
+         onclick="setDetailStatus('${s.val}','${s.cls}')">${s.label}</div>
+  `).join('');
+
+  // WA link
+  const msg = `🏥 *طلب دواء منزلي*\n\n👤 الاسم: ${o.name}\n📁 رقم الملف: ${o.fileNo || '—'}\n📞 الجوال: ${o.phone}\n🏢 الفرع: ${o.branch || '—'}\n\n📝 ${o.notes || ''}\n\n🔗 رقم الطلب: ${o.id}`;
+  document.getElementById('wa-link').href = 'https://wa.me/?text=' + encodeURIComponent(msg);
+
+  document.getElementById('detail-modal').classList.remove('hidden');
+}
+
+function setDetailStatus(val, cls) {
+  const o = orders.find(x => x.id === currentOrderId);
+  if (!o) return;
+  o.status = val;
+  save();
+  renderOrders();
+
+  const statuses = [
+    { val: 'new', label: '🆕 جديد', cls: 'new' },
+    { val: 'preparing', label: '🔬 جاري التحضير', cls: 'preparing' },
+    { val: 'delivering', label: '🚗 جاري التوصيل', cls: 'delivering' },
+    { val: 'done', label: '✅ تم التوصيل', cls: 'done' },
+  ];
+
+  document.getElementById('status-select-row').innerHTML = statuses.map(s => `
+    <div class="status-option ${o.status === s.val ? 'selected-' + s.cls : ''}"
+         onclick="setDetailStatus('${s.val}','${s.cls}')">${s.label}</div>
+  `).join('');
+
+  showToast('✅ تم تحديث الحالة');
+}
+
+function quickStatus(id, status, e) {
+  e.stopPropagation();
+  const o = orders.find(x => x.id === id);
+  if (!o) return;
+  o.status = status;
+  save();
+  renderOrders();
+  showToast('✅ تم تحديث الحالة');
+}
+
+function deleteCurrentOrder() {
+  if (!currentOrderId) return;
+  if (!confirm('هل تريد حذف هذا الطلب؟')) return;
+  orders = orders.filter(x => x.id !== currentOrderId);
+  save();
+  closeModal('detail-modal');
+  renderOrders();
+  showToast('🗑 تم حذف الطلب');
+}
+
+// ─── EXPORT ──────────────────────────────────────────────────────────────────
+function exportExcel() {
+  const headers = ['رقم الطلب','اسم المريض','رقم الملف','الجوال','الفرع','الحالة','وقت الطلب','ملاحظات'];
+  const statusMap = { new:'جديد', preparing:'جاري التحضير', delivering:'جاري التوصيل', done:'تم التوصيل' };
+  const rows = orders.map(o => [
+    o.id, o.name, o.fileNo, o.phone, o.branch, statusMap[o.status] || o.status,
+    formatTime(o.ts), o.notes
+  ]);
+
+  const csv = [headers, ...rows].map(r => r.map(c => `"${(c||'').toString().replace(/"/g,'""')}"`).join(',')).join('\n');
+  const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'pharmacy-orders-' + new Date().toISOString().slice(0,10) + '.csv';
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast('📊 تم تصدير الملف');
+}
+
+// ─── HELPERS ─────────────────────────────────────────────────────────────────
+function closeModal(id) {
+  document.getElementById(id).classList.add('hidden');
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+// Close modals on backdrop click
+document.querySelectorAll('.modal-overlay').forEach(overlay => {
+  overlay.addEventListener('click', function(e) {
+    if (e.target === this) this.classList.add('hidden');
+  });
+});
+
+// ─── DEMO DATA ───────────────────────────────────────────────────────────────
+if (orders.length === 0) {
+  orders = [
+    { id:'ORD-001001', name:'HODAI AHMAD', fileNo:'2177509', phone:'508801793', branch:'HAIL', relation:'المريض بنفسه', notes:'المريضة تريد توصيل الادوية الى المنزل', status:'new', ts: Date.now() - 5*60*1000 },
+    { id:'ORD-001002', name:'محمد علي السالم', fileNo:'1988341', phone:'505123456', branch:'MADINAH', relation:'أحد أفراد الأسرة', notes:'أدوية ضغط ومرض مزمن', status:'preparing', ts: Date.now() - 30*60*1000 },
+    { id:'ORD-001003', name:'فاطمة أحمد الزهراني', fileNo:'2043211', phone:'501987654', branch:'MADINAH', relation:'المريض بنفسه', notes:'', status:'delivering', ts: Date.now() - 90*60*1000 },
+    { id:'ORD-001004', name:'سعد ناصر العتيبي', fileNo:'1765432', phone:'556789012', branch:'HAIL', relation:'جهة أخرى', notes:'أدوية مزمنة شهرية', status:'done', ts: Date.now() - 3*60*60*1000 },
+  ];
+  save();
+}
+
+// ─── INIT ─────────────────────────────────────────────────────────────────────
+renderOrders();
+</script>
+</body>
+</html>
