@@ -340,6 +340,21 @@
   }
   .btn-copy-group:hover { background: #F2F7F9; border-color: #CFDDE3; }
 
+  .pickup-toggle-btn {
+    height: 44px; padding: 0 18px; border-radius: 12px; border: 1.5px dashed #C4B5FD; background: #F8F5FF;
+    color: #6D28D9; font-size: 13px; font-weight: 600; cursor: pointer; display: inline-flex;
+    align-items: center; gap: 9px; transition: all .15s;
+  }
+  .pickup-toggle-btn:hover { background: #F3EEFF; border-color: #8B5CF6; }
+  .pickup-active-banner {
+    display: flex; align-items: center; justify-content: space-between; gap: 10px;
+    padding: 12px 14px; background: #F3EEFF; border: 1px solid #DDD6FE; border-radius: 12px;
+    font-size: 12.5px; color: #5B21B6; flex-wrap: wrap;
+  }
+  .pickup-active-banner .btn-undo {
+    font-size: 12px; font-weight: 600; color: #137CAE; cursor: pointer; text-decoration: underline; white-space: nowrap;
+  }
+
   /* TOAST */
   .toast {
     position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%) translateY(20px);
@@ -575,20 +590,25 @@
       <div class="section-label">تحديث حالة الطلب</div>
       <div class="status-grid" id="status-grid"></div>
 
-      <div class="section-label">إشعار الموصّل</div>
-      <div id="d-driver-warn"></div>
-      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
-        <button class="wa-btn" onclick="sendDriver()">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="#fff"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
-          إرسال للموصّل
-        </button>
-        <button class="btn-copy-group" onclick="copyGroupMessage()">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-          نسخ رسالة القروب
-        </button>
-        <span style="font-size:12px;color:var(--muted);" id="d-driver-label"></span>
+      <div class="section-label">طريقة الاستلام</div>
+      <div id="pickup-toggle-zone"></div>
+
+      <div class="section-label" id="driver-section-label">إشعار الموصّل</div>
+      <div id="driver-section">
+        <div id="d-driver-warn"></div>
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+          <button class="wa-btn" onclick="sendDriver()">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="#fff"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+            إرسال للموصّل
+          </button>
+          <button class="btn-copy-group" onclick="copyGroupMessage()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+            نسخ رسالة القروب
+          </button>
+          <span style="font-size:12px;color:var(--muted);" id="d-driver-label"></span>
+        </div>
+        <p style="font-size:11px;color:var(--muted2);margin-top:6px;">انسخها ثم افتح قروب الموصّلين على واتساب وألصقها (Ctrl+V)</p>
       </div>
-      <p style="font-size:11px;color:var(--muted2);margin-top:6px;">انسخها ثم افتح قروب الموصّلين على واتساب وألصقها (Ctrl+V)</p>
 
       <div class="modal-footer between">
         <button class="btn-delete" onclick="deleteOrder()">
@@ -718,7 +738,9 @@ function save() { localStorage.setItem('sgh-orders', JSON.stringify(orders)); }
 function genId() { return 'SGH-' + Date.now().toString().slice(-6); }
 function fmtTime(ts) {
   const d = new Date(ts);
-  return d.toLocaleDateString('ar-SA') + ' ' + d.toLocaleTimeString('ar-SA', {hour:'2-digit',minute:'2-digit'});
+  const datePart = d.toLocaleDateString('en-GB'); // DD/MM/YYYY, Gregorian, English digits
+  const timePart = d.toLocaleTimeString('en-GB', {hour:'2-digit',minute:'2-digit'}); // 24h, English digits
+  return datePart + ' ' + timePart;
 }
 
 const AVATAR_PALETTE = [
@@ -736,6 +758,8 @@ const STATUS = {
   ready:      { label:'جاهزة',         bg:'#E6FBF8', color:'#0E7A70', dot:'#0E9488', next:'delivering', nextLabel:'خرج للتوصيل',   nextColor:'#2AA1D4' },
   delivering: { label:'جاري التوصيل',  bg:'#E6F4FB', color:'#137CAE', dot:'#2AA1D4', next:'done',        nextLabel:'تم التسليم ✓',  nextColor:'#37A24C' },
   done:       { label:'تم التوصيل',    bg:'#E8F5EC', color:'#2C7E3C', dot:'#37A24C', next:null,          nextLabel:null,            nextColor:null },
+  pickup:     { label:'بانتظار الاستلام', bg:'#F3EEFF', color:'#6D28D9', dot:'#8B5CF6', next:'pickedup',   nextLabel:'تم الاستلام ✓', nextColor:'#37A24C' },
+  pickedup:   { label:'تم الاستلام',   bg:'#E8F5EC', color:'#2C7E3C', dot:'#37A24C', next:null,          nextLabel:null,            nextColor:null },
 };
 
 const NAV_DEFS = [
@@ -744,11 +768,12 @@ const NAV_DEFS = [
   { key:'preparing',  label:'جاري التحضير', dot:'#D97706' },
   { key:'ready',      label:'جاهزة',         dot:'#0E9488' },
   { key:'delivering', label:'جاري التوصيل', dot:'#2AA1D4' },
+  { key:'pickup',     label:'بانتظار الاستلام', dot:'#8B5CF6' },
   { key:'done',       label:'تم التوصيل',   dot:'#37A24C' },
 ];
 
 function counts() {
-  const c = { all: orders.length, new:0, preparing:0, ready:0, delivering:0, done:0 };
+  const c = { all: orders.length, new:0, preparing:0, ready:0, delivering:0, done:0, pickup:0, pickedup:0 };
   orders.forEach(o => { if (c[o.status] !== undefined) c[o.status]++; });
   return c;
 }
@@ -802,7 +827,7 @@ function renderFTabs() {
   const c = counts();
   const tabs = [
     {key:'all', label:'الكل'}, {key:'new', label:'جديد'}, {key:'preparing', label:'تحضير'},
-    {key:'ready', label:'جاهزة'}, {key:'delivering', label:'توصيل'}, {key:'done', label:'مكتمل'}
+    {key:'ready', label:'جاهزة'}, {key:'delivering', label:'توصيل'}, {key:'pickup', label:'استلام فرع'}, {key:'done', label:'مكتمل'}
   ];
   document.getElementById('ftabs').innerHTML = tabs.map(t => `
     <button class="ftab ${filter===t.key?'active':''}" onclick="setFilter('${t.key}')">${t.label}</button>
@@ -829,8 +854,10 @@ function render() {
     if (q) return (o.name||'').toLowerCase().includes(q) || (o.phone||'').includes(q) || (o.fileNo||'').includes(q);
     return true;
   }).sort((a,b) => {
-    if (a.status==='done' && b.status!=='done') return 1;
-    if (b.status==='done' && a.status!=='done') return -1;
+    const aFinished = a.status==='done' || a.status==='pickedup';
+    const bFinished = b.status==='done' || b.status==='pickedup';
+    if (aFinished && !bFinished) return 1;
+    if (bFinished && !aFinished) return -1;
     return b.ts - a.ts;
   });
 
@@ -984,10 +1011,33 @@ function openDetail(id) {
   document.getElementById('d-driver-warn').innerHTML = dp ? '' : `
     <div class="driver-warn"><span>⚠️</span><span>لم يُضف رقم الموصّل بعد — <span class="link" onclick="closeModal('detail-modal');openDriverModal()">أضفه الآن</span></span></div>`;
 
+  const isPickupPath = o.status === 'pickup' || o.status === 'pickedup';
+  const pickupZone = document.getElementById('pickup-toggle-zone');
+  const driverSection = document.getElementById('driver-section');
+  const driverLabel = document.getElementById('driver-section-label');
+
+  if (isPickupPath) {
+    pickupZone.innerHTML = `
+      <div class="pickup-active-banner">
+        <span>🏢 العميل اختار الاستلام من الفرع — لا يحتاج موصّل لهذا الطلب</span>
+        <span class="btn-undo" onclick="undoPickup()">رجوع لمسار التوصيل</span>
+      </div>`;
+    driverSection.style.display = 'none';
+    driverLabel.style.display = 'none';
+  } else {
+    pickupZone.innerHTML = `
+      <button class="pickup-toggle-btn" onclick="setPickupMode()">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l1-5h16l1 5"/><path d="M3 9v11a1 1 0 0 0 1 1h16a1 1 0 0 0 1-1V9"/><path d="M3 9h18"/><path d="M9 21V14h6v7"/></svg>
+        العميل سيستلم من الفرع
+      </button>`;
+    driverSection.style.display = '';
+    driverLabel.style.display = '';
+  }
+
   document.getElementById('detail-modal').classList.remove('hidden');
 }
 
-const STATUS_TS_FIELD = { new:'tsNew', preparing:'tsPreparing', ready:'tsReady', delivering:'tsDelivering', done:'tsDone' };
+const STATUS_TS_FIELD = { new:'tsNew', preparing:'tsPreparing', ready:'tsReady', delivering:'tsDelivering', done:'tsDone', pickup:'tsPickup', pickedup:'tsPickedup' };
 function stampStatusTime(o, status) {
   const field = STATUS_TS_FIELD[status];
   if (field && !o[field]) o[field] = Date.now();
@@ -1009,6 +1059,25 @@ function quickStatus(e, id, status) {
   persistOrder(o);
   render();
   showToast('✅ تم تحديث الحالة');
+}
+
+// ── BRANCH PICKUP MODE ─────────────────────────────────────────────────
+function setPickupMode() {
+  const o = orders.find(x => x.id === currentId); if (!o) return;
+  o.status = 'pickup'; stampStatusTime(o, 'pickup'); save();
+  persistOrder(o);
+  render();
+  openDetail(currentId);
+  showToast('🏢 تم تحويل الطلب لاستلام من الفرع');
+}
+
+function undoPickup() {
+  const o = orders.find(x => x.id === currentId); if (!o) return;
+  o.status = 'ready'; stampStatusTime(o, 'ready'); save();
+  persistOrder(o);
+  render();
+  openDetail(currentId);
+  showToast('↩️ رجع الطلب لمسار التوصيل');
 }
 
 function deleteOrder() {
@@ -1097,8 +1166,8 @@ function copyDriverLink() {
 
 // ── EXPORT ─────────────────────────────────────────────────────────────
 function exportCSV() {
-  const sL = { new:'جديد', preparing:'جاري التحضير', ready:'جاهزة', delivering:'جاري التوصيل', done:'تم التوصيل' };
-  const hdr = ['رقم الطلب','الاسم','رقم الملف','الجوال','الفرع','الحالة الحالية','وقت الإنشاء (جديد)','وقت بدء التحضير','وقت الجاهزية','وقت الخروج للتوصيل','وقت التسليم (تم التوصيل)','ملاحظات'];
+  const sL = { new:'جديد', preparing:'جاري التحضير', ready:'جاهزة', delivering:'جاري التوصيل', done:'تم التوصيل', pickup:'بانتظار الاستلام من الفرع', pickedup:'تم الاستلام من الفرع' };
+  const hdr = ['رقم الطلب','الاسم','رقم الملف','الجوال','الفرع','الحالة الحالية','وقت الإنشاء (جديد)','وقت بدء التحضير','وقت الجاهزية','وقت الخروج للتوصيل','وقت التسليم (تم التوصيل)','وقت تحويل لاستلام الفرع','وقت الاستلام من الفرع','ملاحظات'];
   const rows = orders.map(o => [
     o.id, o.name, o.fileNo, o.phone, o.branch, sL[o.status]||o.status,
     o.tsNew ? fmtTime(o.tsNew) : fmtTime(o.ts),
@@ -1106,6 +1175,8 @@ function exportCSV() {
     o.tsReady ? fmtTime(o.tsReady) : '',
     o.tsDelivering ? fmtTime(o.tsDelivering) : '',
     o.tsDone ? fmtTime(o.tsDone) : '',
+    o.tsPickup ? fmtTime(o.tsPickup) : '',
+    o.tsPickedup ? fmtTime(o.tsPickedup) : '',
     o.notes
   ]);
   const csv = [hdr,...rows].map(r => r.map(c=>`"${(c||'').toString().replace(/"/g,'""')}"`).join(',')).join('\n');
@@ -1125,7 +1196,7 @@ function showToast(msg) {
 }
 
 // ── INIT ───────────────────────────────────────────────────────────────
-document.getElementById('today-str').textContent = new Date().toLocaleDateString('ar-SA', { weekday:'long', day:'numeric', month:'long' });
+document.getElementById('today-str').textContent = new Date().toLocaleDateString('en-GB', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
 updateDriverBox();
 render();
 </script>
