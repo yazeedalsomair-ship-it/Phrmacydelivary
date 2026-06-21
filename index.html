@@ -624,7 +624,7 @@
       <input type="text" id="driver-link-inp" readonly style="flex:1;height:44px;padding:0 12px;border:1px solid var(--border);border-radius:10px;font-size:12.5px;direction:ltr;color:var(--text2);background:var(--surface2);">
       <button class="btn-save" style="white-space:nowrap;" onclick="copyDriverLink()">نسخ</button>
     </div>
-    <p style="font-size:11px;color:var(--muted2);margin-top:10px;">⚠️ الرابط يعتمد على Firebase حتى يعمل من أي جهاز — راجع قسم الإعداد بالأسفل.</p>
+    <p style="font-size:11px;color:var(--muted2);margin-top:10px;">✅ متصل ويعمل من أي جهاز فوراً.</p>
   </div>
 </div>
 
@@ -1017,15 +1017,28 @@ function sendDriver() {
   if (!dp) { closeModal('detail-modal'); openDriverModal(); return; }
   const raw = dp.replace(/\D/g,'');
   const ph = raw.startsWith('966') ? raw : raw.startsWith('0') ? '966'+raw.slice(1) : '966'+raw;
-  const link = driverLinkFor(o.id);
-  const msg = `🏥 *${o.id} — طلب دواء منزلي*\n\n👤 الاسم: ${o.name}\n📁 رقم الملف: ${o.fileNo||'—'}\n📞 جوال المريض: ${o.phone}\n🏢 الفرع: ${o.branch||'—'}\n\n📝 ${o.notes||''}\n\n🔗 لتأكيد التسليم اضغط الرابط:\n${link}\n\n— المستشفى السعودي الألماني حائل`;
+  const link = driverLinkFor();
+  const lines = [
+    '*طلب دواء منزلي*',
+    '',
+    'الاسم: ' + o.name,
+    'رقم الملف: ' + (o.fileNo || '—'),
+    'جوال المريض: ' + o.phone,
+    'الفرع: ' + (o.branch || '—'),
+  ];
+  if (o.notes) { lines.push(''); lines.push(o.notes); }
+  lines.push('');
+  lines.push('لتأكيد التسليم اضغط الرابط:');
+  lines.push(link);
+  lines.push('');
+  lines.push('المستشفى السعودي الألماني - حائل');
+  const msg = lines.join('\n');
   window.open(`https://wa.me/${ph}?text=${encodeURIComponent(msg)}`, '_blank');
 }
 
 // ── DRIVER LINK ────────────────────────────────────────────────────────
-function driverLinkFor(orderId) {
-  const base = location.href.replace(/index\.html$|sgh-delivery\.html$/,'').replace(/\/$/,'');
-  return base + '/driver.html' + (orderId ? ('?id=' + orderId) : '');
+function driverLinkFor() {
+  return 'https://yazeedalsomair-ship-it.github.io/draiver/';
 }
 function openDriverLink() {
   document.getElementById('driver-link-inp').value = driverLinkFor();
