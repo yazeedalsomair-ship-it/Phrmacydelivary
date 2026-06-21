@@ -154,7 +154,7 @@
   }
 
   /* ── STATS ── */
-  .stats-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 14px; margin-bottom: 22px; }
+  .stats-grid { display: grid; grid-template-columns: repeat(5,1fr); gap: 14px; margin-bottom: 22px; }
   .stat-card {
     background: #fff; border: 1px solid var(--border2); border-radius: 16px;
     padding: 18px 18px 16px; box-shadow: 0 1px 2px rgba(16,52,66,.03), 0 10px 24px -18px rgba(16,52,66,.22);
@@ -164,6 +164,7 @@
   .stat-card.c-all::before  { background: var(--navy); }
   .stat-card.c-new::before  { background: #3730A3; }
   .stat-card.c-prep::before { background: #D97706; }
+  .stat-card.c-read::before { background: #0E9488; }
   .stat-card.c-del::before  { background: var(--blue); }
   .stat-card.c-done::before { background: var(--green); }
   .stat-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
@@ -318,7 +319,7 @@
   .detail-item-value { font-size: 13.5px; font-weight: 600; color: var(--text); }
   .notes-box { font-size: 13px; color: #3A525C; background: var(--surface2); padding: 12px 14px; border-radius: 11px; border: 1px solid #EEF2F4; line-height: 1.6; }
 
-  .status-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 8px; margin-bottom: 22px; }
+  .status-grid { display: grid; grid-template-columns: repeat(5,1fr); gap: 8px; margin-bottom: 22px; }
   .status-opt { padding: 11px 6px; border-radius: 12px; border: 2px solid var(--border); cursor: pointer; font-size: 11.5px; font-weight: 600; text-align: center; transition: all .15s; display: flex; flex-direction: column; align-items: center; gap: 6px; background: #fff; color: var(--muted); }
   .status-opt .dot { width: 10px; height: 10px; border-radius: 50%; }
 
@@ -662,12 +663,12 @@
       <div class="bnav-add-c"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></div>
       <span>إضافة</span>
     </button>
-    <button class="bnav-item" id="bn-delivering" onclick="mobileNav('delivering',this)">
+    <button class="bnav-item" id="bn-ready" onclick="mobileNav('ready',this)">
       <span class="bnav-icon-wrap">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13" rx="2"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
-        <span class="bnav-badge" id="bnb-delivering"></span>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+        <span class="bnav-badge" id="bnb-ready"></span>
       </span>
-      <span class="bl">توصيل</span>
+      <span class="bl">جاهزة</span>
     </button>
     <button class="bnav-item" id="bn-done" onclick="mobileNav('done',this)">
       <span class="bnav-icon-wrap">
@@ -730,22 +731,24 @@ function avatarColors(name) {
 }
 
 const STATUS = {
-  new:        { label:'جديد',          bg:'#EEF0FF', color:'#3730A3', dot:'#3730A3', next:'preparing',  nextLabel:'بدء التحضير',  nextColor:'#D97706' },
-  preparing:  { label:'جاري التحضير',  bg:'#FBF1E0', color:'#B5751A', dot:'#D97706', next:'delivering', nextLabel:'خرج للتوصيل',  nextColor:'#2AA1D4' },
-  delivering: { label:'جاري التوصيل',  bg:'#E6F4FB', color:'#137CAE', dot:'#2AA1D4', next:'done',        nextLabel:'تم التسليم ✓', nextColor:'#37A24C' },
-  done:       { label:'تم التوصيل',    bg:'#E8F5EC', color:'#2C7E3C', dot:'#37A24C', next:null,          nextLabel:null,           nextColor:null },
+  new:        { label:'جديد',          bg:'#EEF0FF', color:'#3730A3', dot:'#3730A3', next:'preparing',  nextLabel:'بدء التحضير',   nextColor:'#D97706' },
+  preparing:  { label:'جاري التحضير',  bg:'#FBF1E0', color:'#B5751A', dot:'#D97706', next:'ready',      nextLabel:'جاهزة',          nextColor:'#0E9488' },
+  ready:      { label:'جاهزة',         bg:'#E6FBF8', color:'#0E7A70', dot:'#0E9488', next:'delivering', nextLabel:'خرج للتوصيل',   nextColor:'#2AA1D4' },
+  delivering: { label:'جاري التوصيل',  bg:'#E6F4FB', color:'#137CAE', dot:'#2AA1D4', next:'done',        nextLabel:'تم التسليم ✓',  nextColor:'#37A24C' },
+  done:       { label:'تم التوصيل',    bg:'#E8F5EC', color:'#2C7E3C', dot:'#37A24C', next:null,          nextLabel:null,            nextColor:null },
 };
 
 const NAV_DEFS = [
   { key:'all',        label:'جميع الطلبات', dot:'#16323D' },
   { key:'new',        label:'طلبات جديدة',  dot:'#3730A3' },
   { key:'preparing',  label:'جاري التحضير', dot:'#D97706' },
+  { key:'ready',      label:'جاهزة',         dot:'#0E9488' },
   { key:'delivering', label:'جاري التوصيل', dot:'#2AA1D4' },
   { key:'done',       label:'تم التوصيل',   dot:'#37A24C' },
 ];
 
 function counts() {
-  const c = { all: orders.length, new:0, preparing:0, delivering:0, done:0 };
+  const c = { all: orders.length, new:0, preparing:0, ready:0, delivering:0, done:0 };
   orders.forEach(o => { if (c[o.status] !== undefined) c[o.status]++; });
   return c;
 }
@@ -761,7 +764,7 @@ function renderNav() {
     </button>
   `).join('');
 
-  ['all','new','preparing','delivering','done'].forEach(k => {
+  ['all','new','ready','done'].forEach(k => {
     const bb = document.getElementById('bnb-'+k);
     if (bb) { bb.textContent = c[k]; bb.style.display = c[k] > 0 ? '' : 'none'; }
   });
@@ -775,6 +778,8 @@ function renderStats() {
       icon:'<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>' },
     { key:'preparing', label:'جاري التحضير', sub:'بانتظار الصيدلية',   accent:'#D97706', iconBg:'#FBF1E0', value:c.preparing,
       icon:'<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 2v6l-5 9a2 2 0 0 0 2 3h12a2 2 0 0 0 2-3l-5-9V2"/><line x1="9" y1="2" x2="15" y2="2"/></svg>' },
+    { key:'ready', label:'جاهزة للتوصيل', sub:'بانتظار الموصّل',   accent:'#0E9488', iconBg:'#E6FBF8', value:c.ready,
+      icon:'<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>' },
     { key:'delivering', label:'جاري التوصيل', sub:'في الطريق للمريض',  accent:'#2AA1D4', iconBg:'#E6F4FB', value:c.delivering,
       icon:'<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13" rx="2"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>' },
     { key:'done', label:'تم التوصيل', sub:'طلبات مكتملة',      accent:'#37A24C', iconBg:'#E8F5EC', value:c.done,
@@ -797,7 +802,7 @@ function renderFTabs() {
   const c = counts();
   const tabs = [
     {key:'all', label:'الكل'}, {key:'new', label:'جديد'}, {key:'preparing', label:'تحضير'},
-    {key:'delivering', label:'توصيل'}, {key:'done', label:'مكتمل'}
+    {key:'ready', label:'جاهزة'}, {key:'delivering', label:'توصيل'}, {key:'done', label:'مكتمل'}
   ];
   document.getElementById('ftabs').innerHTML = tabs.map(t => `
     <button class="ftab ${filter===t.key?'active':''}" onclick="setFilter('${t.key}')">${t.label}</button>
@@ -879,13 +884,15 @@ function saveOrder() {
   const name = document.getElementById('f-name').value.trim();
   const phone = document.getElementById('f-phone').value.trim();
   if (!name || !phone) { showToast('⚠️ أدخل اسم المريض ورقم الجوال'); return; }
+  const now = Date.now();
   const o = {
     id: genId(), name, phone,
     fileNo: document.getElementById('f-file').value.trim(),
     branch: document.getElementById('f-branch').value,
     relation: document.getElementById('f-relation').value,
     notes: document.getElementById('f-notes').value.trim(),
-    status: 'new', ts: Date.now()
+    status: 'new', ts: now,
+    tsNew: now, tsPreparing: null, tsReady: null, tsDelivering: null, tsDone: null
   };
   orders.unshift(o); save();
   persistOrder(o);
@@ -961,6 +968,7 @@ function openDetail(id) {
   const steps = [
     { v:'new', l:'جديد', dot:'#3730A3' },
     { v:'preparing', l:'جاري التحضير', dot:'#D97706' },
+    { v:'ready', l:'جاهزة', dot:'#0E9488' },
     { v:'delivering', l:'جاري التوصيل', dot:'#2AA1D4' },
     { v:'done', l:'تم التوصيل', dot:'#37A24C' },
   ];
@@ -979,9 +987,15 @@ function openDetail(id) {
   document.getElementById('detail-modal').classList.remove('hidden');
 }
 
+const STATUS_TS_FIELD = { new:'tsNew', preparing:'tsPreparing', ready:'tsReady', delivering:'tsDelivering', done:'tsDone' };
+function stampStatusTime(o, status) {
+  const field = STATUS_TS_FIELD[status];
+  if (field && !o[field]) o[field] = Date.now();
+}
+
 function setStatus(val) {
   const o = orders.find(x => x.id === currentId); if (!o) return;
-  o.status = val; save();
+  o.status = val; stampStatusTime(o, val); save();
   persistOrder(o);
   render();
   openDetail(currentId);
@@ -991,7 +1005,7 @@ function setStatus(val) {
 function quickStatus(e, id, status) {
   e.stopPropagation();
   const o = orders.find(x => x.id === id); if (!o) return;
-  o.status = status; save();
+  o.status = status; stampStatusTime(o, status); save();
   persistOrder(o);
   render();
   showToast('✅ تم تحديث الحالة');
@@ -1083,9 +1097,17 @@ function copyDriverLink() {
 
 // ── EXPORT ─────────────────────────────────────────────────────────────
 function exportCSV() {
-  const sL = { new:'جديد', preparing:'جاري التحضير', delivering:'جاري التوصيل', done:'تم التوصيل' };
-  const hdr = ['رقم الطلب','الاسم','رقم الملف','الجوال','الفرع','الحالة','وقت الطلب','ملاحظات'];
-  const rows = orders.map(o => [o.id,o.name,o.fileNo,o.phone,o.branch,sL[o.status]||o.status,fmtTime(o.ts),o.notes]);
+  const sL = { new:'جديد', preparing:'جاري التحضير', ready:'جاهزة', delivering:'جاري التوصيل', done:'تم التوصيل' };
+  const hdr = ['رقم الطلب','الاسم','رقم الملف','الجوال','الفرع','الحالة الحالية','وقت الإنشاء (جديد)','وقت بدء التحضير','وقت الجاهزية','وقت الخروج للتوصيل','وقت التسليم (تم التوصيل)','ملاحظات'];
+  const rows = orders.map(o => [
+    o.id, o.name, o.fileNo, o.phone, o.branch, sL[o.status]||o.status,
+    o.tsNew ? fmtTime(o.tsNew) : fmtTime(o.ts),
+    o.tsPreparing ? fmtTime(o.tsPreparing) : '',
+    o.tsReady ? fmtTime(o.tsReady) : '',
+    o.tsDelivering ? fmtTime(o.tsDelivering) : '',
+    o.tsDone ? fmtTime(o.tsDone) : '',
+    o.notes
+  ]);
   const csv = [hdr,...rows].map(r => r.map(c=>`"${(c||'').toString().replace(/"/g,'""')}"`).join(',')).join('\n');
   const a = document.createElement('a');
   a.href = URL.createObjectURL(new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8'}));
