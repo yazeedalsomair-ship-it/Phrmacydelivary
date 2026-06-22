@@ -356,6 +356,40 @@
   }
   .btn-copy-group:hover { background: #F2F7F9; border-color: #CFDDE3; }
 
+  /* COLD CHAIN — refrigerated medication indicator */
+  .cold-toggle-row {
+    display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    padding: 13px 14px; border-radius: 12px; background: #F0F9FF; border: 1.5px solid #BAE6FD;
+    cursor: pointer; transition: all .15s;
+  }
+  .cold-toggle-row:hover { background: #E0F4FE; }
+  .cold-toggle-left { display: flex; align-items: center; gap: 11px; }
+  .cold-toggle-icon { font-size: 22px; line-height: 1; }
+  .cold-toggle-label { font-size: 13px; font-weight: 700; color: #075985; }
+  .cold-toggle-sub { font-size: 11px; color: #4B8FAE; margin-top: 1px; }
+
+  .toggle-switch {
+    width: 46px; height: 26px; border-radius: 14px; border: none; background: #CBD5DB;
+    position: relative; cursor: pointer; flex-shrink: 0; padding: 0; transition: background .2s;
+  }
+  .toggle-switch.on { background: #0EA5E9; }
+  .toggle-knob {
+    position: absolute; top: 3px; right: 3px; width: 20px; height: 20px; border-radius: 50%;
+    background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,.25); transition: right .2s;
+  }
+  .toggle-switch.on .toggle-knob { right: 23px; }
+
+  .cold-chip {
+    display: inline-flex; align-items: center; gap: 4px; font-size: 10.5px; font-weight: 700;
+    color: #0369A1; background: #E0F4FE; border: 1px solid #BAE6FD; border-radius: 20px;
+    padding: 2px 8px; white-space: nowrap;
+  }
+
+  /* Cold-chain order highlighting across views */
+  .order-row.cold-order { background: #F7FCFF; border-right: 4px solid #0EA5E9; }
+  .order-row.cold-order:hover { background: #EFF9FF; }
+
+
   .pickup-toggle-btn {
     height: 44px; padding: 0 18px; border-radius: 12px; border: 1.5px dashed #C4B5FD; background: #F8F5FF;
     color: #6D28D9; font-size: 13px; font-weight: 600; cursor: pointer; display: inline-flex;
@@ -570,6 +604,18 @@
           <label>ملاحظات / التعليق</label>
           <textarea id="f-notes" placeholder="المريضة تريد توصيل الأدوية إلى المنزل…"></textarea>
         </div>
+        <div class="form-field form-full">
+          <div class="cold-toggle-row" id="cold-toggle-row" onclick="toggleColdChain()">
+            <div class="cold-toggle-left">
+              <span class="cold-toggle-icon">🧊</span>
+              <div>
+                <div class="cold-toggle-label">يحتاج تبريد</div>
+                <div class="cold-toggle-sub">أدوية حساسة للحرارة — تنبيه خاص للموصّل</div>
+              </div>
+            </div>
+            <button type="button" class="toggle-switch" id="cold-toggle-switch"><span class="toggle-knob"></span></button>
+          </div>
+        </div>
       </div>
 
       <div class="modal-footer">
@@ -608,6 +654,18 @@
       <div style="margin-bottom:20px;">
         <div class="detail-item-label" style="margin-bottom:5px;">ملاحظات</div>
         <div class="notes-box" id="d-notes"></div>
+      </div>
+
+      <div class="section-label">سلسلة التبريد</div>
+      <div class="cold-toggle-row" id="d-cold-toggle-row" onclick="toggleColdChainDetail()" style="margin-bottom:20px;">
+        <div class="cold-toggle-left">
+          <span class="cold-toggle-icon">🧊</span>
+          <div>
+            <div class="cold-toggle-label">يحتاج تبريد</div>
+            <div class="cold-toggle-sub">أدوية حساسة للحرارة — تنبيه خاص للموصّل</div>
+          </div>
+        </div>
+        <button type="button" class="toggle-switch" id="d-cold-toggle-switch"><span class="toggle-knob"></span></button>
       </div>
 
       <div class="section-label">تحديث حالة الطلب</div>
@@ -914,12 +972,12 @@ function render() {
       ? `<button class="act-next" style="background:${st.nextColor}" onclick="quickStatus(event,'${o.id}','${st.next}')">${st.nextLabel}</button>`
       : `<span class="act-done">✓ مكتمل</span>`;
     return `
-    <div class="grid-cols order-row" onclick="openDetail('${o.id}')">
+    <div class="grid-cols order-row${o.needsCold ? ' cold-order' : ''}" onclick="openDetail('${o.id}')">
       <div class="order-num">${i+1}</div>
       <div class="order-patient">
         <span class="avatar" style="background:${aBg};color:${aColor};">${initial}</span>
         <div style="min-width:0;">
-          <div class="order-name">${o.name||'—'}</div>
+          <div class="order-name">${o.name||'—'}${o.needsCold ? ' <span class="cold-chip">🧊 تبريد</span>' : ''}</div>
           <div class="order-file">${o.fileNo?'ملف: '+o.fileNo:''}</div>
         </div>
       </div>
@@ -936,12 +994,21 @@ function render() {
 }
 
 // ── ADD ORDER ──────────────────────────────────────────────────────────
+let addModalColdChain = false;
+
 function openAddModal() {
   ['f-name','f-file','f-phone','f-notes'].forEach(id => document.getElementById(id).value='');
   document.getElementById('f-branch').value = 'HAIL';
   document.getElementById('img-prev').classList.remove('show');
   document.getElementById('ai-bar').classList.remove('show');
+  addModalColdChain = false;
+  document.getElementById('cold-toggle-switch').classList.remove('on');
   document.getElementById('add-modal').classList.remove('hidden');
+}
+
+function toggleColdChain() {
+  addModalColdChain = !addModalColdChain;
+  document.getElementById('cold-toggle-switch').classList.toggle('on', addModalColdChain);
 }
 
 function saveOrder() {
@@ -955,13 +1022,14 @@ function saveOrder() {
     branch: document.getElementById('f-branch').value,
     relation: document.getElementById('f-relation').value,
     notes: document.getElementById('f-notes').value.trim(),
+    needsCold: addModalColdChain,
     status: 'new', ts: now,
     tsNew: now, tsPreparing: null, tsReady: null, tsDelivering: null, tsDone: null
   };
   orders.unshift(o); save();
   persistOrder(o);
   closeModal('add-modal'); render();
-  showToast('✅ تم إضافة الطلب بنجاح');
+  showToast(o.needsCold ? '✅ تم إضافة الطلب — 🧊 يحتاج تبريد' : '✅ تم إضافة الطلب بنجاح');
 }
 
 // ── AI IMAGE EXTRACTION ────────────────────────────────────────────────
@@ -1028,6 +1096,7 @@ function openDetail(id) {
   document.getElementById('d-rel').textContent = o.relation || '—';
   document.getElementById('d-time').textContent = fmtTime(o.ts);
   document.getElementById('d-notes').textContent = o.notes || 'لا توجد ملاحظات';
+  document.getElementById('d-cold-toggle-switch').classList.toggle('on', !!o.needsCold);
 
   const steps = [
     { v:'new', l:'جديد', dot:'#3730A3' },
@@ -1078,6 +1147,16 @@ const STATUS_TS_FIELD = { new:'tsNew', preparing:'tsPreparing', ready:'tsReady',
 function stampStatusTime(o, status) {
   const field = STATUS_TS_FIELD[status];
   if (field && !o[field]) o[field] = Date.now();
+}
+
+function toggleColdChainDetail() {
+  const o = orders.find(x => x.id === currentId); if (!o) return;
+  o.needsCold = !o.needsCold;
+  save();
+  persistOrder(o);
+  document.getElementById('d-cold-toggle-switch').classList.toggle('on', o.needsCold);
+  render();
+  showToast(o.needsCold ? '🧊 تم تحديد الطلب كيحتاج تبريد' : 'تم إلغاء تنبيه التبريد');
 }
 
 function setStatus(val) {
@@ -1153,6 +1232,7 @@ function buildDriverMessage(o) {
     'جوال المريض: ' + o.phone,
     'الفرع: ' + (o.branch || '—'),
   ];
+  if (o.needsCold) { lines.push(''); lines.push('⚠️ يحتاج تبريد — استخدم صندوق مبرّد'); }
   if (o.notes) { lines.push(''); lines.push(o.notes); }
   lines.push('');
   lines.push('لتأكيد التسليم اضغط الرابط:');
@@ -1204,9 +1284,9 @@ function copyDriverLink() {
 // ── EXPORT ─────────────────────────────────────────────────────────────
 function exportCSV() {
   const sL = { new:'جديد', preparing:'جاري التحضير', ready:'جاهزة', delivering:'جاري التوصيل', done:'تم التوصيل', pickup:'بانتظار الاستلام من الفرع', pickedup:'تم الاستلام من الفرع' };
-  const hdr = ['رقم الطلب','الاسم','رقم الملف','الجوال','الفرع','الحالة الحالية','وقت الإنشاء (جديد)','وقت بدء التحضير','وقت الجاهزية','وقت الخروج للتوصيل','وقت التسليم (تم التوصيل)','وقت تحويل لاستلام الفرع','وقت الاستلام من الفرع','ملاحظات'];
+  const hdr = ['رقم الطلب','الاسم','رقم الملف','الجوال','الفرع','يحتاج تبريد','الحالة الحالية','وقت الإنشاء (جديد)','وقت بدء التحضير','وقت الجاهزية','وقت الخروج للتوصيل','وقت التسليم (تم التوصيل)','وقت تحويل لاستلام الفرع','وقت الاستلام من الفرع','ملاحظات'];
   const rows = orders.map(o => [
-    o.id, o.name, o.fileNo, o.phone, o.branch, sL[o.status]||o.status,
+    o.id, o.name, o.fileNo, o.phone, o.branch, o.needsCold ? 'نعم' : 'لا', sL[o.status]||o.status,
     o.tsNew ? fmtTime(o.tsNew) : fmtTime(o.ts),
     o.tsPreparing ? fmtTime(o.tsPreparing) : '',
     o.tsReady ? fmtTime(o.tsReady) : '',
