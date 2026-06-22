@@ -144,6 +144,7 @@
 
   /* ── MAIN ── */
   main.content { flex: 1; min-width: 0; padding: 26px 28px; overflow-y: auto; }
+  .page-footer { text-align: center; font-size: 11px; color: var(--muted2); padding: 24px 0 8px; }
 
   .page-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; margin-bottom: 22px; flex-wrap: wrap; }
   .page-title { font-size: 23px; font-weight: 700; letter-spacing: -.015em; color: var(--navy); }
@@ -154,7 +155,7 @@
   }
 
   /* ── STATS ── */
-  .stats-grid { display: grid; grid-template-columns: repeat(5,1fr); gap: 14px; margin-bottom: 22px; }
+  .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(168px, 1fr)); gap: 14px; margin-bottom: 22px; }
   .stat-card {
     background: #fff; border: 1px solid var(--border2); border-radius: 16px;
     padding: 18px 18px 16px; box-shadow: 0 1px 2px rgba(16,52,66,.03), 0 10px 24px -18px rgba(16,52,66,.22);
@@ -167,6 +168,7 @@
   .stat-card.c-read::before { background: #0E9488; }
   .stat-card.c-del::before  { background: var(--blue); }
   .stat-card.c-done::before { background: var(--green); }
+  .stat-card.c-pick::before { background: #8B5CF6; }
   .stat-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
   .stat-label { font-size: 12px; font-weight: 600; color: var(--muted); }
   .stat-ico {
@@ -186,6 +188,20 @@
     outline: none; transition: all .15s; direction: rtl;
   }
   .search-wrap input:focus { border-color: var(--blue); box-shadow: 0 0 0 4px rgba(42,161,212,.1); }
+
+  .date-filter-wrap { position: relative; display: flex; align-items: center; }
+  .date-filter-wrap input[type="date"] {
+    height: 44px; padding: 0 14px; border: 1px solid var(--border); border-radius: 12px;
+    background: #fff; font-size: 13px; color: var(--text); outline: none; cursor: pointer;
+    transition: all .15s; font-family: inherit; direction: ltr; text-align: right;
+  }
+  .date-filter-wrap input[type="date"]:focus { border-color: var(--blue); box-shadow: 0 0 0 4px rgba(42,161,212,.1); }
+  .date-filter-clear {
+    position: absolute; left: 8px; top: 50%; transform: translateY(-50%);
+    width: 22px; height: 22px; border-radius: 50%; border: none; background: var(--bg);
+    color: var(--muted); cursor: pointer; font-size: 11px; display: flex; align-items: center; justify-content: center;
+  }
+  .date-filter-clear:hover { background: var(--border); color: var(--text); }
 
   .ftabs { display: flex; background: #fff; border: 1px solid var(--border); border-radius: 12px; padding: 4px; gap: 2px; }
   .ftab {
@@ -375,6 +391,7 @@
     .stats-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
     .stat-value { font-size: 24px; }
     .toolbar { flex-direction: column; align-items: stretch; }
+    .date-filter-wrap input[type="date"] { width: 100%; }
     .ftabs { overflow-x: auto; }
     .table-card { overflow-x: auto; }
     .modal { border-radius: 18px 18px 0 0; position: fixed; bottom: 0; left: 0; right: 0; max-height: 90vh; margin: 0; max-width: 100% !important; }
@@ -478,6 +495,10 @@
         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
         <input type="text" id="search-inp" placeholder="ابحث بالاسم، رقم الملف، أو الجوال…" oninput="render()">
       </div>
+      <div class="date-filter-wrap">
+        <input type="date" id="date-filter-inp" onchange="render()">
+        <button class="date-filter-clear" id="date-filter-clear" onclick="clearDateFilter()" title="إلغاء الفلتر" style="display:none;">✕</button>
+      </div>
       <div class="ftabs" id="ftabs"></div>
     </div>
 
@@ -487,6 +508,8 @@
       </div>
       <div id="orders-list"></div>
     </div>
+
+    <div class="page-footer">Made by Dr.Yazeed Alsomair</div>
 
   </main>
 </div>
@@ -809,6 +832,8 @@ function renderStats() {
       icon:'<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13" rx="2"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>' },
     { key:'done', label:'تم التوصيل', sub:'طلبات مكتملة',      accent:'#37A24C', iconBg:'#E8F5EC', value:c.done,
       icon:'<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>' },
+    { key:'pickedup', label:'تم الاستلام من الفرع', sub:'استلام مباشر',  accent:'#8B5CF6', iconBg:'#F3EEFF', value:c.pickedup,
+      icon:'<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l1-5h16l1 5"/><path d="M3 9v11a1 1 0 0 0 1 1h16a1 1 0 0 0 1-1V9"/><path d="M3 9h18"/><path d="M9 21V14h6v7"/></svg>' },
   ];
   document.getElementById('stats-grid').innerHTML = defs.map(s => `
     <div class="stat-card c-${s.key==='all'?'all':s.key.slice(0,4)}">
@@ -843,14 +868,26 @@ function setFilter(f) {
 }
 function mobileNav(f, btn) { filter = f; document.querySelectorAll('.bnav-item').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); render(); }
 
+function clearDateFilter() {
+  document.getElementById('date-filter-inp').value = '';
+  render();
+}
+
 // ── ORDERS TABLE ───────────────────────────────────────────────────────
 function render() {
   renderNav(); renderStats(); renderFTabs();
   const q = document.getElementById('search-inp').value.toLowerCase();
+  const dateVal = document.getElementById('date-filter-inp').value; // 'YYYY-MM-DD' or ''
+  document.getElementById('date-filter-clear').style.display = dateVal ? '' : 'none';
   const list = document.getElementById('orders-list');
 
   let items = orders.filter(o => {
     if (filter !== 'all' && o.status !== filter) return false;
+    if (dateVal) {
+      const d = new Date(o.ts);
+      const localDate = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+      if (localDate !== dateVal) return false;
+    }
     if (q) return (o.name||'').toLowerCase().includes(q) || (o.phone||'').includes(q) || (o.fileNo||'').includes(q);
     return true;
   }).sort((a,b) => {
